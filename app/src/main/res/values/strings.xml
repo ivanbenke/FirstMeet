@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">First Meet</string>
+    <string name="fShare">Share</string>
+    <string name="fInfo">Info</string>
+    <string name="fContacts">Contacts</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="h_NavHeader">First Meet</string>
+    <string name="btn_Share">Share</string>
+    <string name="sv_SearchContacts">Search contacts</string>
+    <string name="et_Save">Save info</string>
+</resources>

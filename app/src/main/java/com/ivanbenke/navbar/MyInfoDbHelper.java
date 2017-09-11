@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +36,12 @@ public class MyInfoDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(DROP_TABLE_MY_BOOKS);
+        db.execSQL(DROP_TABLE_MY_INFO);
         this.onCreate(db);
     }
 
-    static final String CREATE_TABLE_MY_INFO = "CREATE TABLE " + Schema.TABLE_MY_INFO + " (" + Schema.FIRST_NAME + " TEXT," + Schema.LAST_NAME + " TEXT," + Schema.PHONE_NUMBER + " INTEGER);";
-    static final String DROP_TABLE_MY_BOOKS = "DROP TABLE IF EXISTS " + Schema.TABLE_MY_INFO;
+    static final String CREATE_TABLE_MY_INFO = "CREATE TABLE " + Schema.TABLE_MY_INFO + " (" + Schema.FIRST_NAME + " TEXT," + Schema.LAST_NAME + " TEXT," + Schema.PHONE_NUMBER + " TEXT);";
+    static final String DROP_TABLE_MY_INFO = "DROP TABLE IF EXISTS " + Schema.TABLE_MY_INFO;
     static final String SELECT_MY_INFO = "SELECT " + Schema.FIRST_NAME + "," + Schema.LAST_NAME + "," + Schema.PHONE_NUMBER + " FROM " + Schema.TABLE_MY_INFO;
 
     public void insertInfo(String first_name, String last_name, String phone_number){
@@ -58,6 +59,7 @@ public class MyInfoDbHelper extends SQLiteOpenHelper {
         } else {
             writeableDatabase.insert(Schema.TABLE_MY_INFO, null, contentValues);
         }
+        mcursor.close();
         writeableDatabase.close();
     }
 

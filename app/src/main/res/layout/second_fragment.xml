@@ -52,5 +52,4 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/tvPhoneNumber"
         android:src="@mipmap/ic_edit_info"/>
-
 </RelativeLayout>

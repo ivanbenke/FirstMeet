@@ -7,13 +7,6 @@
     tools:context="com.ivanbenke.navbar.ThirdFragment"
     android:orientation="vertical">
 
-    <SearchView
-        android:id="@+id/svSearchContacts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:iconifiedByDefault="false"
-        android:queryHint="@string/sv_SearchContacts"></SearchView>
-
     <ListView
         android:id="@+id/lvContacts"
         android:layout_width="match_parent"

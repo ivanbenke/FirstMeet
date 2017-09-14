@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -252,6 +253,7 @@ public class SecondFragment extends Fragment {
                                     }
                                     // Continue only if the File was successfully created
                                     if (photoFile != null) {
+                                        Log.d("photouri", "photoFile nije null");
                                         takePictureIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                         Uri photoURI = FileProvider.getUriForFile(getActivity(), "com.ivanbenke.navbar.fileprovider", photoFile);
                                         mCapturedImageURI = photoURI;
@@ -287,7 +289,6 @@ public class SecondFragment extends Fragment {
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentImagePath = image.getAbsolutePath();
-        Log.d("Orientation", mCurrentImagePath + " camera");
         return image;
     }
 
@@ -304,7 +305,6 @@ public class SecondFragment extends Fragment {
                 } catch (IOException e) {
                     Toast.makeText(getContext(), "IOException" , Toast.LENGTH_SHORT).show();
                 }
-                System.out.println("On activity Result uri = " + mCapturedImageURI.toString());
             } else {
                 Toast.makeText(getContext(), "Error getting Image", Toast.LENGTH_SHORT).show();
             }
@@ -314,38 +314,84 @@ public class SecondFragment extends Fragment {
         if (requestCode == 1000) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri selectedImage = data.getData();
-                System.out.println("Content Path : " + selectedImage.toString());
                 if (selectedImage != null) {
-                    mCurrentImagePath = getRealPathFromURI(selectedImage);
-                    File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                    String imageFileName = "ProfilePhoto.jpg";
-                    File f = new File(storageDir, imageFileName);
-                    if (f.exists()) {
+                    if (selectedImage.toString().startsWith("content://com.google.android.apps.photos.contentprovider")) {
                         try {
-                            f.delete();
-                            copyFile(new File(mCurrentImagePath), f);
-                        } catch (IOException e) {
+                            InputStream is = getContext().getContentResolver().openInputStream(selectedImage);
+                            if (is != null) {
+                                Bitmap pictureBitmap = BitmapFactory.decodeStream(is);
+                                mCurrentImagePath = getRealPathFromURI(getImageUri(getContext(), pictureBitmap));
+                                File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                                String imageFileName = "ProfilePhoto.jpg";
+                                File f = new File(storageDir, imageFileName);
+                                File c = new File(mCurrentImagePath);
+                                if (f.exists()) {
+                                    try {
+                                        f.delete();
+                                        copyFile(c, f);
+                                        c.delete();
+                                        mCurrentImagePath = f.getPath();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    try {
+                                        copyFile(c, f);
+                                        c.delete();
+                                        mCurrentImagePath = f.getPath();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                Uri selectedImageUri = Uri.fromFile(new File(mCurrentImagePath));
+                                try {
+                                    ivPicture.setImageBitmap(getScaledBitmap(selectedImageUri));
+                                } catch (IOException e) {
+
+                                }
+                            }
+                        } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
                     } else {
-                        try {
-                            copyFile(new File(mCurrentImagePath), f);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        mCurrentImagePath = getRealPathFromURI(selectedImage);
+                        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                        String imageFileName = "ProfilePhoto.jpg";
+                        File f = new File(storageDir, imageFileName);
+                        if (f.exists()) {
+                            try {
+                                f.delete();
+                                copyFile(new File(mCurrentImagePath), f);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            try {
+                                copyFile(new File(mCurrentImagePath), f);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                    try {
-                        ivPicture.setImageBitmap(getScaledBitmap(selectedImage));
-                    } catch (IOException e) {
-                        Toast.makeText(getContext(), "IOException" , Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Error getting Image", Toast.LENGTH_SHORT).show();
+                        try {
+                            ivPicture.setImageBitmap(getScaledBitmap(selectedImage));
+                        } catch (IOException e) {
+                            Toast.makeText(getContext(), "IOException", Toast.LENGTH_SHORT).show();
+                        }
+                    } /*else {
+                        Toast.makeText(getContext(), "Error getting Image", Toast.LENGTH_SHORT).show();
+                    }*/
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(getContext(), "No Photo Selected", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public Uri getImageUri(Context context, Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "ProfilePhoto.jpg", null);
+        return Uri.parse(path);
     }
 
     private void copyFile(File sourceFile, File destFile) throws IOException {
@@ -467,34 +513,43 @@ public class SecondFragment extends Fragment {
     }
 
     public String getRealPathFromURI(Uri uri) {
-        if (Build.VERSION.SDK_INT >= 19) {
-            String id = uri.getLastPathSegment().split(":")[0];
-            final String[] imageColumns = {MediaStore.Images.Media.DATA };
-            final String imageOrderBy = null;
-            Uri tempUri = getUri();
-            Cursor imageCursor = getContext().getContentResolver().query(tempUri, imageColumns, MediaStore.Images.Media._ID + "=" + id, null, imageOrderBy);
-            if (imageCursor.moveToFirst()) {
-                return imageCursor.getString(imageCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            } else {
-                return null;
-            }
-        } else {
-            String[] projection = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, null);
-            if (cursor != null) {
+//        if (Build.VERSION.SDK_INT >= 19) {
+//            String id = uri.getLastPathSegment().split(":")[0];
+//            Log.d("id:", id);
+//            final String[] imageColumns = {MediaStore.Images.Media.DATA };
+//            final String imageOrderBy = null;
+//            Uri tempUri = getUri();
+//            Cursor imageCursor = getContext().getContentResolver().query(tempUri, imageColumns, /*null*/MediaStore.Images.Media._ID + "=" + id, null, imageOrderBy);
+//            if (imageCursor.moveToFirst()) {
+//                return imageCursor.getString(imageCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+//            } else {
+//                return null;
+//            }
+//        } else {
+            Cursor cursor = null;
+        try {
+            String[] projection = {MediaStore.Images.Media.DATA};
+            cursor = getContext().getContentResolver().query(uri, projection, null, null, null);
+            if (/*cursor != null*/cursor.moveToFirst()) {
                 int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                cursor.moveToFirst();
+//                cursor.moveToFirst();
                 return cursor.getString(column_index);
-            } else
+            } /*else {
                 return null;
-        }
+            }*/
+//        }
+        } catch (Exception e) {
+        } /*finally {
+            cursor.close();
+        }*/
+        return "";
     }
 
-    private Uri getUri() {
+    /*private Uri getUri() {
         String state = Environment.getExternalStorageState();
         if(!state.equalsIgnoreCase(Environment.MEDIA_MOUNTED))
             return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
 
         return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    }
+    }*/
 }

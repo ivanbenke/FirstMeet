@@ -11,26 +11,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:hint="ime"/>
+        android:hint="@string/et_FirstName"/>
 
     <EditText
         android:id="@+id/etLastName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:hint="prezime"/>
+        android:hint="@string/et_LastName"/>
 
     <EditText
         android:id="@+id/etPhoneNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:hint="broj"/>
+        android:hint="@string/et_PhoneNumber"/>
 
     <Button
         android:id="@+id/bSave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/et_Save"/>
+        android:text="@string/btn_Save"/>
 </LinearLayout>

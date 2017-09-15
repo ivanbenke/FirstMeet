@@ -55,18 +55,18 @@ public class ContactInfoDbHelper extends SQLiteOpenHelper {
         contentValues.put(Schema.LATITUDE, latitude);
         contentValues.put(Schema.LONGITUDE, longitude);
         SQLiteDatabase writeableDatabase = this.getWritableDatabase();
-        /*String count = "SELECT count(*) FROM " + Schema.TABLE_CONTACT_INFO + " WHERE " + Schema.ID + " = " + id;
-        Cursor mcursor = writeableDatabase.rawQuery(count, null);
+        String select = Schema.ID + " = ?";
+        String count = "SELECT count(*) FROM " + Schema.TABLE_CONTACT_INFO + " WHERE " + Schema.ID + " = ?";
+        Cursor mcursor = writeableDatabase.rawQuery(count, new String[]{id});
         mcursor.moveToFirst();
-        String select = Schema.ID + " = " + id;
         int icount = mcursor.getInt(0);
         if (icount > 0 ) {
-            writeableDatabase.update(Schema.TABLE_CONTACT_INFO, contentValues, select, null);
+            writeableDatabase.update(Schema.TABLE_CONTACT_INFO, contentValues, select, new String[]{id});
         } else {
             writeableDatabase.insert(Schema.TABLE_CONTACT_INFO, null, contentValues);
         }
-        mcursor.close();*/
-        writeableDatabase.replace(Schema.TABLE_CONTACT_INFO, null, contentValues);
+        mcursor.close();
+        //writeableDatabase.replace(Schema.TABLE_CONTACT_INFO, null, contentValues);
         writeableDatabase.close();
     }
 

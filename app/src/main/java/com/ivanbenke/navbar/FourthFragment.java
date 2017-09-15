@@ -79,4 +79,11 @@ public class FourthFragment extends Fragment {
 
         inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getActivity().setTitle(R.string.fInfo);
+    }
 }

@@ -54,7 +54,7 @@ public class ThirdFragment extends Fragment {
                 fragment.setArguments(args);
 
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.flContent, fragment).addToBackStack(null).commit();
             }
         });
 
@@ -63,5 +63,12 @@ public class ThirdFragment extends Fragment {
 
     private ArrayList<Contact> loadContacts() {
         return ContactInfoDbHelper.getInstance(getActivity()).getAllContacts();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getActivity().setTitle(R.string.fContacts);
     }
 }

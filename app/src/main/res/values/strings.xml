@@ -7,7 +7,19 @@
     <string name="drawer_close">Close navigation drawer</string>
     <string name="h_NavHeader">First Meet</string>
     <string name="btn_Share">Share</string>
-    <string name="sv_SearchContacts">Search contacts</string>
-    <string name="et_Save">Save info</string>
+    <string name="btn_Save">Save info</string>
     <string name="btn_Location">Show on \nmap</string>
+    <string name="tv_Instructions">Instructions:\n
+        1. Grant all permissions and enable all features\n
+        2. Click on SHARE to start tracking your location\n
+        3. Wait until you get a Location updated message\n
+        4. Put your phones together to initiate Android Beam transfer\n
+        5. Upon transfer completion, the receiver should click on the Beam complete notification to add new contact\n
+        6. New contact is added</string>
+    <string name="tv_FirstName">First name</string>
+    <string name="tv_LastName">Last name</string>
+    <string name="tv_PhoneNumber">Phone number</string>
+    <string name="et_FirstName">First name</string>
+    <string name="et_LastName">Last name</string>
+    <string name="et_PhoneNumber">Phone number</string>
 </resources>

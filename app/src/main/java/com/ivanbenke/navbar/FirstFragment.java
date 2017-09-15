@@ -87,9 +87,10 @@ public class FirstFragment extends Fragment {
             phone_number = myInfo.get(2);
         }
 
-        if (!hasPermission()) {
-            requestPermission();
-        }
+        SharedPreferences prefs = getActivity().getSharedPreferences("LOCATION", Context.MODE_PRIVATE);
+        latitude = prefs.getString("latitude", "");
+        longitude = prefs.getString("longitude", "");
+        Log.d("latlongonCreateTracking", latitude + " lat, " + longitude + " lon");
 
         mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
@@ -120,6 +121,10 @@ public class FirstFragment extends Fragment {
                     });
                     alertbox.show();
                 } else {
+                    if (hasPermission()) {
+                        startTracking();
+                    }
+
                     jsonMyInfo = new JSONObject();
                     try {
                         jsonMyInfo.put("firstname", first_name);
@@ -149,10 +154,6 @@ public class FirstFragment extends Fragment {
                         Toast.makeText(getContext(), "Your data hasn't been entered or you haven't granted read/write permissions" , Toast.LENGTH_SHORT).show();
                     }
 
-                    if (hasPermission()) {
-                        startTracking();
-                    }
-
                     mNfcAdapter.setBeamPushUrisCallback(new NfcAdapter.CreateBeamUrisCallback() {
                         @Override
                         public Uri[] createBeamUris(NfcEvent event) {
@@ -171,9 +172,19 @@ public class FirstFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        if (!hasPermission()) {
+            requestPermission();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        Toast.makeText(getContext(), "Press SHARE to find your location", Toast.LENGTH_SHORT).show();
+
+        getActivity().setTitle(R.string.fShare);
         Intent intent = getActivity().getIntent();
         String action = intent.getAction();
         if (TextUtils.equals(action, Intent.ACTION_VIEW)) {
@@ -223,12 +234,13 @@ public class FirstFragment extends Fragment {
                     }
                 }
 
-                SharedPreferences prefs = getContext().getSharedPreferences("LOCATION", Context.MODE_PRIVATE);
-                String lat = prefs.getString("latitude", "");
-                String lon = prefs.getString("longitude", "");
-                Log.d("latlongonResumeTracking", lat + " lat, " + lon + " lon");
-                if (!lat.isEmpty() && !lat.equals("null") && !lon.isEmpty() && !lon.equals("null")) {
-                    ContactInfoDbHelper.getInstance(getActivity()).insertInfo(firstname, lastname, phonenumber, lat, lon);
+                SharedPreferences prefs = getActivity().getSharedPreferences("LOCATION", Context.MODE_PRIVATE);
+                latitude = prefs.getString("latitude", "");
+                longitude = prefs.getString("longitude", "");
+                Log.d("latlongonResumeTracking", latitude + " lat, " + longitude + " lon");
+                if (latitude != null && longitude != null) {
+                    Log.d("latlongInsideTracking", latitude + " lat, " + longitude + " lon");
+                    ContactInfoDbHelper.getInstance(getActivity()).insertInfo(firstname, lastname, phonenumber, latitude, longitude);
                     prefs.edit().remove("latitude").apply();
                     prefs.edit().remove("longitude").apply();
                 }
@@ -236,6 +248,18 @@ public class FirstFragment extends Fragment {
         } else {
             Log.d("Error", "Error with receiving Android Beam");
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        stopTracking();
+    }
+
+    private void stopTracking() {
+        Log.d("Tracking", "Tracking stopped.");
+        mLocationManager.removeUpdates(mLocationListener);
     }
 
     private boolean checkLocation() {
@@ -247,7 +271,7 @@ public class FirstFragment extends Fragment {
     private void showAlert() {
         final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
         dialog.setTitle("Enable Location")
-                .setMessage("You need to enable location to use this app!")
+                .setMessage("You need to enable location to use this app")
                 .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface paramDialogInterface, int paramInt) {
@@ -270,7 +294,8 @@ public class FirstFragment extends Fragment {
     private void startTracking() {
         if(!checkLocation())
             return;
-        Log.d("Tracking", "Tracking started.");
+        Log.d("Tracking", "Tracking started");
+        Toast.makeText(getContext(), "Tracking started, please wait until location is updated", Toast.LENGTH_SHORT).show();
         String locationProvider = LocationManager.GPS_PROVIDER;
         long minTime = 1000;
         float minDistance = 10;
@@ -434,14 +459,12 @@ public class FirstFragment extends Fragment {
     private void updateLocation(Location location){
         latitude = "" + location.getLatitude();
         longitude = "" + location.getLongitude();
+        Toast.makeText(getContext(), "Location updated", Toast.LENGTH_SHORT).show();
         Log.d("latlongTracking", latitude + " lat, " + longitude + " lon");
-        if (!latitude.isEmpty() && !latitude.equals("null") && !longitude.isEmpty() && !longitude.equals("null")) {
-            Toast.makeText(getContext(), "Location updated", Toast.LENGTH_SHORT).show();
-            SharedPreferences prefs = getContext().getSharedPreferences("LOCATION", Context.MODE_PRIVATE);
-            SharedPreferences.Editor prefsEdit = prefs.edit();
-            prefsEdit.putString("latitude", latitude);
-            prefsEdit.putString("longitude", longitude);
-            prefsEdit.apply();
-        }
+        SharedPreferences prefs = getActivity().getSharedPreferences("LOCATION", Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefsEdit = prefs.edit();
+        prefsEdit.putString("latitude", latitude);
+        prefsEdit.putString("longitude", longitude);
+        prefsEdit.apply();
     }
 }

@@ -25,6 +25,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -89,7 +94,7 @@ public class FifthFragment extends Fragment {
         bContactInfoLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String uri = "http://maps.google.com/maps?daddr=" + latitude + "," + longitude + " (" + firstName + " " + lastName + ")";
+                String uri = "http://maps.google.com/maps?q=" + latitude + "," + longitude + " (" + firstName + " " + lastName + ")";
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 intent.setPackage("com.google.android.apps.maps");
                 try
@@ -195,5 +200,12 @@ public class FifthFragment extends Fragment {
         } else {
             return ExifInterface.ORIENTATION_NORMAL;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getActivity().setTitle(R.string.fContacts);
     }
 }
